@@ -6,20 +6,30 @@ from decimal import Decimal
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'product_count']
+    
+    product_count= serializers.IntegerField()
 
     
 class ProductSerializer(serializers.ModelSerializer):
     price = serializers.DecimalField(max_digits=6, decimal_places=2, source= 'unit_price')
-    collection = CollectionSerializer()
-    detail_collection = serializers.HyperlinkedRelatedField(
-            queryset= Collection.objects.all(),
-            view_name='collection-detail',
-            source = 'collection'
-        )    
+    #collection = CollectionSerializer()
+   #detail_collection = serializers.HyperlinkedRelatedField(
+            #queryset= Collection.objects.all(),
+            #view_name='collection-detail',
+            #source = 'collection'
+      #  )    
     class Meta:
         model = Product
-        fields = ['id', 'title', 'price', 'price_with_tax', 'collection', 'detail_collection']
+        fields = ['id', 
+                  'title', 
+                  'slug',
+                  'price', 
+                  'price_with_tax', 
+                  'collection', 
+                  'inventory',
+                  #'detail_collection'
+                  ]
         
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
 
