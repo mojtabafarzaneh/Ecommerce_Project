@@ -79,6 +79,7 @@ class CartSerializer(serializers.ModelSerializer):
 
 class CreateCartItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField()
+
     
     def save(self, **kwargs):
         cart_id = self.context['cart_id']
@@ -95,6 +96,8 @@ class CreateCartItemSerializer(serializers.ModelSerializer):
             self.instance = CartItem.objects.create(cart_id=cart_id, **self.validated_data)
         
         return self.instance
+
+        
     
     def validate_product_id(self, value):
         if not Product.objects.filter(pk=value).exists():
