@@ -7,8 +7,8 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework import status
-from .models import *
-from .seriallizers import *
+from .models import Collection,Order, OrderItem, Product, Cart, CartItem, Review, Customer
+from .seriallizers import UpdateOrdereSerializer,CreateOrderSerializer,OrderItemsSerializer,CollectionSerializer, ProductSerializer, ReviewSerializer,CartSerializer,CreateCartItemSerializer, UpdateClassItemSerializer,CartItemSerializer,CustomerSerializer, OrderSerializer
 from .filters import ProductFilter
 from .permissions import IsAdminOrReadOnly
 from .pagination import DefaultPagination
@@ -108,6 +108,40 @@ class CustomerViewSet(ModelViewSet):
             serializer.save()
             data = serializer.data 
             return Response(data)
+    
+
+
+class OrderViewSet(ModelViewSet):
+    http_method_names=['get', 'delete', 'patch', 'head', 'option', 'post']
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+    
+    
+    def create(self, request, *args, **kwargs):
+        serializer = CreateOrderSerializer(
+            data=request.data,
+            context={'user_id': self.request.user.id}
+        )
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateOrderSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateOrdereSerializer
+        return OrderSerializer
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Order.objects.all()
         
+        (customer_id, created) = Customer.objects.only('id').get_or_create(user_id = user.id)
+        return Order.objects.filter(customer_id=customer_id)
         
         
