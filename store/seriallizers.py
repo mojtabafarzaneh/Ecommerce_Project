@@ -113,3 +113,10 @@ class UpdateClassItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['quantity']
+        
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = Customer
+        fields = ['id', 'phone', 'birth_date', 'user_id', 'membership' ]
