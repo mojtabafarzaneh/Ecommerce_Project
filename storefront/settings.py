@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import warnings
+from django.utils import timezone
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,12 +44,14 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'djoser',
+    'silk',
     'playground',
     'debug_toolbar',
     'store',
     'tags',
     'likes',
     'core',
+    
 ]
 
 MIDDLEWARE = [
@@ -62,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+#if DEBUG:
+  #  MIDDLEWARE += 'silk.middleware.SilkyMiddleware',
 
 INTERNAL_IPS = [
     # ...
@@ -184,3 +189,13 @@ EMAIL_PORT = 2525
 DEFAULT_FROM_EMAIL = 'info@moshbuy.com'
 
 warnings.filterwarnings(action='ignore')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
