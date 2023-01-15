@@ -17,6 +17,9 @@ django-cors-headers = "*"
 django-templated-mail = "*"
 redis = "*"
 django-redis = "*"
+whitenoise = "*"
+gunicorn = "*"
+waitress = "*"
 
 [dev-packages]
 autopep8 = "*"

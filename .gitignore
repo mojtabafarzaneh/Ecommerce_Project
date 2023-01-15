@@ -3,3 +3,5 @@ projects.code-workspace
 install
 /media/
 /static/
+general.log
+*.pyc
