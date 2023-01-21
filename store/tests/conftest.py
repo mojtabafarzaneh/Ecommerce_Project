@@ -7,6 +7,7 @@ import pytest
 def api_client():
     return APIClient()
     
+
 @pytest.fixture
 def authenticate(api_client):
     def do_authenticate(is_staff=False):
