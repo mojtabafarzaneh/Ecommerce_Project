@@ -1,6 +1,6 @@
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
-
+from rest_framework.test import force_authenticate
 import pytest 
 
 @pytest.fixture

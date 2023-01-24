@@ -2,8 +2,10 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from model_bakery import baker
 import pytest
-from store.models import Product
+from store.models import Product, Collection
 from django.contrib.auth.models import User
+import json
+
 
 
 @pytest.fixture
@@ -15,27 +17,58 @@ def create_product(api_client):
 @pytest.mark.django_db
 class TestCreateProduct:
     def test_user_is_anonymous_returns_401(self, create_product):
-        response = create_product({'title':'a', 'price':3.21, 'collection':1, 'inventory':1})
+        response = create_product({"title": "ss",
+                                   "slug": "ss",
+                                   "price": 2.0,
+                                   "price_with_tax": 2.2,
+                                   "collection": 2,
+                                   "inventory": 2})
         
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
     
-    def test_user_is_not_admin_returns_403(self, api_client, create_product, authenticate):
+    def test_user_is_not_admin_returns_403(self,api_client, create_product , authenticate):
         authenticate(is_staff=False)
-        
-        response = create_product({'title':'a', 'price':3.21, 'collection':1, 'inventory':1})
-        
+
+        response = create_product({"title": "ss",
+                                   "slug": "ss",
+                                   "price": 2.0,
+                                   "price_with_tax": 2.2,
+                                   "collection": 2,
+                                   "inventory": 2})
         assert response.status_code == status.HTTP_403_FORBIDDEN
         
     def test_data_is_invalid_returns_400(self, api_client, create_product, authenticate):
         authenticate(is_staff=True)
         
-        response = create_product({'title':'a','slug': '-','price': 1, 'collection':1, 'inventory':1})
+        response = create_product({"title": "ss",
+                                   "slug": "ss",
+                                   "price": 2.0,
+                                   'collection': 2,
+                                   "inventory": 2})
+
         
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        #assert response.data['title'] is not None
+    
+    def test_data_is_valid_returns_201(self, authenticate, api_client, create_product):
 
 
+        
+        authenticate(is_staff=True)
+        product = baker.make(Product)
+        
+        valid_data = {
+            'title': product.title,
+            'slug':product.slug,
+            'price':product.unit_price,
+            'collection': product.collection.pk,
+            'inventory': product.inventory
+        }
+        
+        response = create_product(valid_data)
+        
+        print(response.data)      
+        assert response.status_code == status.HTTP_201_CREATED
 
         
 @pytest.mark.django_db
