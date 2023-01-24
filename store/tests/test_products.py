@@ -7,6 +7,11 @@ from django.contrib.auth.models import User
 import json
 
 
+@pytest.fixture
+def create_collection(api_client):
+    def do_create_collection(collection):
+        return api_client.post('/store/collections/', collection)
+    return do_create_collection
 
 @pytest.fixture
 def create_product(api_client):
@@ -50,18 +55,19 @@ class TestCreateProduct:
         
         assert response.status_code == status.HTTP_400_BAD_REQUEST
     
-    def test_data_is_valid_returns_201(self, authenticate, api_client, create_product):
+    def test_data_is_valid_returns_201(self, authenticate, api_client, create_product, create_collection):
 
 
         
         authenticate(is_staff=True)
         product = baker.make(Product)
+        collection = create_collection({'title':'a'})
         
         valid_data = {
             'title': product.title,
             'slug':product.slug,
             'price':product.unit_price,
-            'collection': product.collection.pk,
+            'collection': collection.data['id'],
             'inventory': product.inventory
         }
         
