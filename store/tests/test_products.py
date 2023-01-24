@@ -60,18 +60,14 @@ class TestCreateProduct:
 
         
         authenticate(is_staff=True)
-        product = baker.make(Product)
+
         collection = create_collection({'title':'a'})
         
-        valid_data = {
-            'title': product.title,
-            'slug':product.slug,
-            'price':product.unit_price,
-            'collection': collection.data['id'],
-            'inventory': product.inventory
-        }
-        
-        response = create_product(valid_data)
+        response = create_product({"title": "ss",
+                                   "slug": "ss",
+                                   "price": 2.0,
+                                   'collection': collection.data['id'],
+                                   "inventory": 2})
         
         print(response.data)      
         assert response.status_code == status.HTTP_201_CREATED
