@@ -32,8 +32,8 @@ class TestCreateProduct:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
     
-    def test_user_is_not_admin_returns_403(self,api_client, create_product , authenticate):
-        authenticate(is_staff=False)
+    def test_user_is_not_admin_returns_403(self,api_client, create_product , authenticate_staff):
+        authenticate_staff(is_staff=False)
 
         response = create_product({"title": "ss",
                                    "slug": "ss",
@@ -43,8 +43,8 @@ class TestCreateProduct:
                                    "inventory": 2})
         assert response.status_code == status.HTTP_403_FORBIDDEN
         
-    def test_data_is_invalid_returns_400(self, api_client, create_product, authenticate):
-        authenticate(is_staff=True)
+    def test_data_is_invalid_returns_400(self, api_client, create_product, authenticate_staff):
+        authenticate_staff(is_staff=True)
         
         response = create_product({"title": "ss",
                                    "slug": "ss",
@@ -55,11 +55,11 @@ class TestCreateProduct:
         
         assert response.status_code == status.HTTP_400_BAD_REQUEST
     
-    def test_data_is_valid_returns_201(self, authenticate, api_client, create_product, create_collection):
+    def test_data_is_valid_returns_201(self, authenticate_staff, api_client, create_product, create_collection):
 
 
         
-        authenticate(is_staff=True)
+        authenticate_staff(is_staff=True)
 
         collection = create_collection({'title':'a'})
         
@@ -69,7 +69,7 @@ class TestCreateProduct:
                                    'collection': collection.data['id'],
                                    "inventory": 2})
         
-        print(response.data)      
+        print(response.headers)
         assert response.status_code == status.HTTP_201_CREATED
 
         

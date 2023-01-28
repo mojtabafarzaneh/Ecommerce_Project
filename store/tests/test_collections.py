@@ -16,9 +16,9 @@ class TestCreateCollections:
         
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         
-    def test_user_is_not_admin_returns_403(self, api_client, create_collection, authenticate):
+    def test_user_is_not_admin_returns_403(self, api_client, create_collection, authenticate_staff):
         #arange
-        authenticate(is_staff=False)
+        authenticate_staff(is_staff=False)
         
         #act
         response = create_collection({ 'title': 'a' })
@@ -26,18 +26,18 @@ class TestCreateCollections:
         #assertion
         assert response.status_code == status.HTTP_403_FORBIDDEN
         
-    def test_data_is_invalid_returns_400(self, api_client, create_collection, authenticate):
+    def test_data_is_invalid_returns_400(self, api_client, create_collection, authenticate_staff):
         
-        authenticate(is_staff=True)
+        authenticate_staff(is_staff=True)
         
         response = create_collection({'title': ''})
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data['title'] is not None
     
-    def test_data_is_valid_returns_201(self, api_client, create_collection, authenticate):
+    def test_data_is_valid_returns_201(self, api_client, create_collection, authenticate_staff):
         
-        authenticate(is_staff=True)
+        authenticate_staff(is_staff=True)
         
         response = create_collection({'title': 'a'})
 
@@ -54,5 +54,4 @@ class TestRetriveCollection:
         assert response.data == {
             'id': collection.id,
             'title':collection.title,
-            
         }

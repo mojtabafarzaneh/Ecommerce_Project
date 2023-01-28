@@ -10,8 +10,8 @@ class TestCreateCart:
         
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
     
-    def test_user_allowed_returns_201(self, api_client, authenticate):
-        authenticate(is_staff=True) 
+    def test_user_allowed_returns_201(self, api_client, authenticate_staff):
+        authenticate_staff(is_staff=True) 
         
         response = api_client.post('/store/carts/')
         
