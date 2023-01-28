@@ -1,4 +1,4 @@
-from store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, ViewCustomerHistoryPermission
+from store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, ViewCustomerHistoryPermission, IsAuthenticatedOrReadOnly
 from store.pagination import DefaultPagination
 from django.db.models.aggregates import Count
 from django.shortcuts import get_object_or_404
@@ -62,13 +62,15 @@ class CartViewSet(CreateModelMixin,
                   RetrieveModelMixin,
                   DestroyModelMixin,
                   GenericViewSet):
-    
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
     
     
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
+    
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -84,6 +86,7 @@ class CartItemViewSet(ModelViewSet):
         return CartItem.objects \
             .filter(cart_id=self.kwargs['cart_pk']) \
             .select_related('product')
+            
 
 
 class CustomerViewSet(ModelViewSet):
