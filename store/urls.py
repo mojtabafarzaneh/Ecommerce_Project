@@ -1,9 +1,9 @@
 from django.urls import path
 from . import views
+from rest_framework.routers import DefaultRouter 
 
-urlpatterns = [
-    path('products/', views.products_list ),
-    path('products/<int:pk>/', views.products_detail),
-    path('collections/<int:pk>/', views.collection_detail, name='collection-detail'),
-    path('collections/', views.collection_list),
-]
+router = DefaultRouter()
+router.register('products', views.ProductViewSet)
+router.register('collections', views.CollectionViewSet)
+
+urlpatterns = router.urls

@@ -5,63 +5,48 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import ModelViewSet
 
-from .models import Product, Collection
+from .models import Product, Collection, OrderItem
 from .serializers import ProductSerializer, CollectionSerializer
 
-# Create your views here.
-@api_view(['GET', 'POST'])
-def products_list(request):
-    if request.method == 'GET':
-        query = Product.objects.select_related('collection').all()
-        serializer = ProductSerializer(query, many=True, context={'request':request})
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        serializer = ProductSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-@api_view(['GET', 'PUT'])
-def products_detail(request, pk):
-    product = Product.objects.get(pk=pk)
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+    def destroy(self, request, *args, **kwargs):
+        if OrderItem.objects.filter(product_id = kwargs['pk']).count() > 0:
+            return Response({'error': 'this product can not be deleted due to some orderation by costumers.'})
+        return super().destroy(request, *args, **kwargs)
 
-    if request.method == 'GET':
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = ProductSerializer(product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def collection_detail(request, pk):
-    collection = get_object_or_404(Collection.objects.annotate(
-        products_count=Count('products')),pk=pk)
-    if request.method == 'GET':
-        serializer = CollectionSerializer(collection)
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = CollectionSerializer(collection, data= request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'DELETE':
+
+class CollectionViewSet(ModelViewSet):
+    queryset = queryset = queryset = Collection.objects.annotate(
+        products_count=Count('products')).all()
+    serializer_class = CollectionSerializer
+    
+    
+    def destroy(self, request, *args, **kwargs):
+        if Product.objects.filter(collection = kwargs['pk']).count() > 0:
+            return Response({'error':'this collection can not be deleted due to the products that related to it.'})
+        return super().destroy(request, *args, **kwargs)
+
+
+            
+    def delete(self, request,pk):
+        collection = get_object_or_404(Collection.objects.annotate(
+        porducts_count = Count('products')), pk=pk)
         if collection.products.count() > 0:
             return Response({'error':'this collection can not be deleted due to the products that related to it.'})
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view(['GET', 'POST'])
-def collection_list(request):
-    if request.method == 'GET':
-        queryset = Collection.objects.annotate(products_count=Count('products')).all()
-        serializer = CollectionSerializer(queryset, many=True)
-        return Response(serializer.data)
+
     
-    elif request.method == 'POST':
-        serializer = CollectionSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
