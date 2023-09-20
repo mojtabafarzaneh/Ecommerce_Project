@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
+from .validatores import validate_file_size
 
 
 class Promotion(models.Model):
@@ -35,6 +36,7 @@ class Product(models.Model):
     collection = models.ForeignKey(
         Collection, on_delete=models.PROTECT, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
+    
 
     def __str__(self) -> str:
         return self.title
@@ -43,8 +45,8 @@ class Product(models.Model):
         ordering = ['title']
         
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='store\media')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='store/images', validators=[validate_file_size])
 
 
 class Customer(models.Model):
